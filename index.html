@@ -115,6 +115,31 @@
         margin-top: 6px;
         width: 100%;
       }
+
+      footer {
+        background-color: #222 !important;
+        color: white !important;
+      }
+      
+      .footer {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-top: 30px;
+      }
+      
+      .footer p {
+        text-align: center;
+      }
+      
+      
+      /* Heartbeat Effect */
+      .heart {
+        color: red;
+        font-size: 1.2rem;
+        display: inline-block;
+        animation: heartbeat 1.5s infinite;
+      }
     }
   </style>
 </head>
@@ -126,6 +151,13 @@
   <button onclick="generate()">Generate XPaths</button>
 
   <div class="result" id="result"></div>
+
+  <div class="footer">
+    <p>Made with <span class="heart">❤️</span> by Chetan</p>
+  </div>
+  <div class="footer">
+      <p>Any Queries? Reach me at <a href="mailto:chetan.bhadane@aqmtechnologies.com">chetan.bhadane@aqmtechnologies.com</a></p>
+  </div>
 
   <script src="/script.js"></script>
 
