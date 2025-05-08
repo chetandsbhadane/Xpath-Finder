@@ -52,6 +52,49 @@ function quote(val) {
     return Array.from(xpaths);
   }
 
+  function generateSeleniumLocators(el) {
+    const tag = el.tagName.toLowerCase();
+    const attr = {};
+    Array.from(el.attributes).forEach(a => attr[a.name] = a.value);
+
+    const locators = {};
+
+    if (attr.id) locators["By ID"] = `By.id('${attr.id}')`;
+    if (attr.name) locators["By Name"] = `By.name('${attr.name}')`;
+    if (attr.id) locators["By CSS"] = `By.cssSelector('${tag}#${attr.id}')`;
+    if (attr.class) {
+      const classes = attr.class.trim().split(/\s+/).join('.');
+      locators["By CSS (class)"] = `By.cssSelector('${tag}.${classes}')`;
+    }
+
+    const bestXPath = generateXPathsFromElement(el)[0];
+    if (bestXPath) locators["By XPath"] = `By.xpath("${bestXPath}")`;
+
+    return locators;
+  }
+
+  function createResultItem(text) {
+    const div = document.createElement('div');
+    div.className = 'xpath-item';
+
+    const span = document.createElement('span');
+    span.className = 'xpath-text';
+    span.textContent = text;
+
+    const btn = document.createElement('button');
+    btn.textContent = 'Copy';
+    btn.className = 'copy-btn';
+    btn.onclick = () => {
+      navigator.clipboard.writeText(text);
+      btn.textContent = 'Copied!';
+      setTimeout(() => btn.textContent = 'Copy', 1500);
+    };
+
+    div.appendChild(span);
+    div.appendChild(btn);
+    return div;
+  }
+
   function generate() {
     const html = document.getElementById("htmlInput").value.trim();
     const tempContainer = document.createElement('div');
@@ -67,27 +110,30 @@ function quote(val) {
     }
 
     const xpaths = generateXPathsFromElement(el);
+    const locators = generateSeleniumLocators(el);
 
-    if (xpaths.length === 0) {
-      resultBox.innerHTML = '<p style="color: gray;">No XPaths could be generated.</p>';
+    if (xpaths.length === 0 && Object.keys(locators).length === 0) {
+      resultBox.innerHTML = '<p style="color: gray;">No locators could be generated.</p>';
       return;
     }
 
-    xpaths.forEach(xpath => {
-      const div = document.createElement('div');
-      div.className = 'xpath-item';
-      const span = document.createElement('span');
-      span.textContent = xpath;
-      const btn = document.createElement('button');
-      btn.textContent = 'Copy';
-      btn.className = 'copy-btn';
-      btn.onclick = () => {
-        navigator.clipboard.writeText(xpath);
-        btn.textContent = 'Copied!';
-        setTimeout(() => btn.textContent = 'Copy', 1500);
-      };
-      div.appendChild(span);
-      div.appendChild(btn);
-      resultBox.appendChild(div);
-    });
+    if (xpaths.length > 0) {
+      const heading = document.createElement('h4');
+      heading.textContent = 'XPath Suggestions';
+      resultBox.appendChild(heading);
+
+      xpaths.forEach(xpath => {
+        resultBox.appendChild(createResultItem(xpath));
+      });
+    }
+
+    if (Object.keys(locators).length > 0) {
+      const heading = document.createElement('h4');
+      heading.textContent = 'Selenium Locator Suggestions';
+      resultBox.appendChild(heading);
+
+      Object.entries(locators).forEach(([label, code]) => {
+        resultBox.appendChild(createResultItem(`${label}: ${code}`));
+      });
+    }
   }
